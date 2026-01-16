@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search">Search</string>
+    <string name="clear">Clear</string>
+    <string name="rating">"Rating: %s"</string>
+    <string name="price">"Price: %s"</string>
+    <string name="string_id">"id: %s"</string>
+    <string name="title">"Title: %s"</string>
+    <string name="category">"Category: %s"</string>
+    <string name="favorites">"Favorites: %s"</string>
+</resources>
