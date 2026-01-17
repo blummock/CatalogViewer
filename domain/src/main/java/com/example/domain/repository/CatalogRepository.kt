@@ -11,5 +11,5 @@ interface CatalogRepository {
 
     suspend fun getBookById(id: String): DataResult<Book?>
 
-    suspend fun updateFavorite(id: String, isFavorite: Boolean): DataResult<Unit>
+    suspend fun toggleFavoriteBook(id: String): DataResult<Unit>
 }

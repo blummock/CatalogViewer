@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.entity.DataResult
-import com.example.domain.use_case.GetBookByIdUseCase
+import com.example.domain.repository.CatalogRepository
 import com.example.presentation.common.model.toUi
 import com.example.presentation.navigation.AppRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class DetailsViewModel @Inject constructor(
-    getBookByIdUseCase: GetBookByIdUseCase,
+    private val catalogRepository: CatalogRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -31,7 +31,7 @@ internal class DetailsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            when (val result = getBookByIdUseCase(bookId)) {
+            when (val result = catalogRepository.getBookById(bookId)) {
                 is DataResult.Error -> {
                     _uiState.value = DetailsState.Ready(book = null)
                     _effect.emit(DetailsEffect.OnShowError(result.error.message))

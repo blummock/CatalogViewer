@@ -130,7 +130,7 @@ private fun CatalogScreenContent(
                                         onAction(CatalogAction.GoToBookView(bookId = book.id))
                                     },
                                     onFavorite = {
-                                        onAction(CatalogAction.OnFavorite(book = book))
+                                        onAction(CatalogAction.OnFavorite(bookId = book.id))
                                     }
                                 )
                             }

@@ -1,6 +1,6 @@
 package com.example.domain.entity
 
-import com.example.domain.exception.CommonError
+import com.example.domain.error.CommonError
 
 sealed interface DataResult<out T> {
     data class Success<T>(

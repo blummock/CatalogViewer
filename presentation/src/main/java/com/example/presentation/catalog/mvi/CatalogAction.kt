@@ -1,7 +1,5 @@
 package com.example.presentation.catalog.mvi
 
-import com.example.presentation.common.model.BookUiItem
-
 internal interface CatalogAction {
 
     data class EditQuery(
@@ -13,6 +11,6 @@ internal interface CatalogAction {
     ) : CatalogAction
 
     data class OnFavorite(
-        val book: BookUiItem,
+        val bookId: String,
     ) : CatalogAction
 }

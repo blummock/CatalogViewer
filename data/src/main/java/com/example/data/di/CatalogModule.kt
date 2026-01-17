@@ -11,6 +11,7 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 internal interface CatalogModule {
 
+    @Suppress("unused")
     @Binds
     fun bind(impl: CatalogRepositoryImpl): CatalogRepository
 }

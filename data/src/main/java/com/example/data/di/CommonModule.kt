@@ -1,0 +1,23 @@
+package com.example.data.di
+
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import jakarta.inject.Singleton
+import kotlinx.serialization.json.Json
+import javax.inject.Named
+
+
+@Module
+@InstallIn(SingletonComponent::class)
+object CommonModule {
+
+    @Provides
+    @Singleton
+    @Named("default")
+    fun provideJson() = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
+}

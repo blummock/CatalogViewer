@@ -1,8 +1,7 @@
 package com.example.data.repository
 
-import com.example.data.file.api.CatalogApi
+import com.example.data.file.source.JsonDataSource
 import com.example.data.local.dao.FavoritesDao
-import com.example.data.local.entity.FavoritesEntity
 import com.example.data.mapper.toDomain
 import com.example.data.mapper.toDomainException
 import com.example.domain.entity.Book
@@ -15,14 +14,14 @@ import kotlinx.coroutines.flow.mapLatest
 import javax.inject.Inject
 
 internal class CatalogRepositoryImpl @Inject constructor(
-    private val api: CatalogApi,
+    private val jsonDataSource: JsonDataSource,
     private val favoritesDao: FavoritesDao,
 ) : CatalogRepository {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getBooks(query: BookQuery): DataResult<Flow<List<Book>>> {
         try {
-            val books = with(api.getCatalog()) {
+            val books = with(jsonDataSource.getCatalog()) {
                 if (query.title.isNotBlank()) {
                     items.filter {
                         it.title.contains(query.title, ignoreCase = true)
@@ -47,7 +46,7 @@ internal class CatalogRepositoryImpl @Inject constructor(
 
     override suspend fun getBookById(id: String): DataResult<Book?> {
         try {
-            val item = api.getCatalog().items.firstOrNull { it.id == id }
+            val item = jsonDataSource.getCatalog().items.firstOrNull { it.id == id }
             return DataResult.Success(
                 data = item?.toDomain(favoritesDao.selectById(id) != null)
             )
@@ -57,11 +56,9 @@ internal class CatalogRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateFavorite(id: String, isFavorite: Boolean): DataResult<Unit> {
+    override suspend fun toggleFavoriteBook(id: String): DataResult<Unit> {
         try {
-            FavoritesEntity(id = id).let {
-                if (isFavorite) favoritesDao.insert(it) else favoritesDao.delete(it)
-            }
+            favoritesDao.toggleFavorite(id)
             return DataResult.Success(data = Unit)
         } catch (t: Throwable) {
             return DataResult.Error(error = t.toDomainException())

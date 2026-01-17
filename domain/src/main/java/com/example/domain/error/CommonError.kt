@@ -1,4 +1,4 @@
-package com.example.domain.exception
+package com.example.domain.error
 
 sealed class CommonError(
     val message: String,

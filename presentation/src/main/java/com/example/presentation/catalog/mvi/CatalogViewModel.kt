@@ -2,11 +2,9 @@ package com.example.presentation.catalog.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.domain.entity.BookQuery
 import com.example.domain.entity.DataResult
-import com.example.domain.use_case.GetBooksUseCase
-import com.example.domain.use_case.UpdateFavoriteUseCase
-import com.example.presentation.common.model.BookUiItem
-import dagger.Lazy
+import com.example.domain.repository.CatalogRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,8 +22,7 @@ import javax.inject.Inject
 @OptIn(FlowPreview::class)
 @HiltViewModel
 internal class CatalogViewModel @Inject constructor(
-    val getBooksUseCase: GetBooksUseCase,
-    val updateFavoriteUseCase: Lazy<UpdateFavoriteUseCase>,
+    private val catalogRepository: CatalogRepository,
 ) : ViewModel() {
 
     private val _effect = MutableSharedFlow<CatalogEffect>()
@@ -40,7 +37,7 @@ internal class CatalogViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .debounce(500)
                 .collectLatest { query ->
-                    when (val result = getBooksUseCase(query)) {
+                    when (val result = catalogRepository.getBooks(BookQuery(query))) {
                         is DataResult.Error -> {
                             _uiState.update { it.setBooks(emptyList()) }
                             _effect.emit(CatalogEffect.OnShowError(result.error.message))
@@ -60,16 +57,13 @@ internal class CatalogViewModel @Inject constructor(
         when (action) {
             is CatalogAction.EditQuery -> editQuery(action.text)
             is CatalogAction.GoToBookView -> goToBookView(action.bookId)
-            is CatalogAction.OnFavorite -> onFavorite(action.book)
+            is CatalogAction.OnFavorite -> onFavorite(action.bookId)
         }
     }
 
-    private fun onFavorite(book: BookUiItem) {
+    private fun onFavorite(id: String) {
         viewModelScope.launch {
-            updateFavoriteUseCase.get().invoke(
-                id = book.id,
-                isFavorite = !book.isFavorite
-            ).let {
+            catalogRepository.toggleFavoriteBook(id).let {
                 if (it is DataResult.Error) {
                     _effect.emit(CatalogEffect.OnShowError(it.error.message))
                 }
