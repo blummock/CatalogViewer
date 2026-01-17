@@ -5,6 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import jakarta.inject.Singleton
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import javax.inject.Named
 
@@ -20,4 +22,8 @@ object CommonModule {
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
+
+    @Provides
+    @Named("io")
+    fun provideDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
