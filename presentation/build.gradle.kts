@@ -10,59 +10,46 @@ plugins {
 
 android {
     namespace = "com.example.presentation"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdkVersion(libs.versions.compileSdk.get().toInt())
 
     defaultConfig {
-        minSdk = 33
+        minSdk = libs.versions.minSdk.get().toInt()
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.javaVersion.get().toInt())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.javaVersion.get().toInt())
     }
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
+        jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
     }
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(project(":domain"))
 
+    // kotlin tools
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.kotlinx.collections.immutable)
+
+    // compose
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.compose.main)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.hilt.navigation.compose)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    // test
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
-
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.kotlinx.collections.immutable)
-
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
-    implementation(libs.androidx.compose.material.icons.extended)
-
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-
-    implementation(libs.navigation.compose)
-
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-    ksp("org.jetbrains.kotlin:kotlin-metadata-jvm:2.3.0")
-
-    implementation(project(":domain"))
 }

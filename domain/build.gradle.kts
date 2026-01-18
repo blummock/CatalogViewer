@@ -1,14 +1,16 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("java-library")
     alias(libs.plugins.jetbrains.kotlin.jvm)
 }
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaVersion.get().toInt())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaVersion.get().toInt())
 }
 kotlin {
     compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+        jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
     }
 }
 

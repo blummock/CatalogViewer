@@ -10,45 +10,42 @@ plugins {
 
 android {
     namespace = "com.example.data"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdkVersion(libs.versions.compileSdk.get().toInt())
 
     defaultConfig {
-        minSdk = 33
+        minSdk = libs.versions.minSdk.get().toInt()
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.javaVersion.get().toInt())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.javaVersion.get().toInt())
     }
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
+        jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
     }
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+    implementation(project(":domain"))
 
+    // serialization
+    implementation(libs.kotlinx.serialization.json)
+
+    // hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    // room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // test
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
-
-
-    implementation(libs.kotlinx.serialization.json)
-    implementation(project(":domain"))
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-    ksp("org.jetbrains.kotlin:kotlin-metadata-jvm:2.3.0")
-
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
 }

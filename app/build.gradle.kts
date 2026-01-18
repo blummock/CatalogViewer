@@ -10,21 +10,19 @@ plugins {
 
 android {
     namespace = "com.example.catalogviewer"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdkVersion(libs.versions.compileSdk.get().toInt())
 
     defaultConfig {
         applicationId = "com.example.catalogviewer"
-        minSdk = 33
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
+        versionCode = libs.versions.versionCode.get().toInt()
+        versionName = libs.versions.versionName.get()
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.javaVersion.get().toInt())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.javaVersion.get().toInt())
     }
     buildFeatures {
         compose = true
@@ -33,26 +31,22 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
+        jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
     }
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
-    testImplementation(libs.junit)
-
     implementation(project(":presentation"))
     implementation(project(":data"))
 
+    // compose
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.compose.main)
+
+    // hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    ksp("org.jetbrains.kotlin:kotlin-metadata-jvm:2.3.0")
+
+    // ksp
+    ksp(libs.kotlin.metadata.jvm)
 }
