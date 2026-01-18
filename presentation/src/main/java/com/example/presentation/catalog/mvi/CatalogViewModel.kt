@@ -25,7 +25,7 @@ internal class CatalogViewModel @Inject constructor(
     private val catalogRepository: CatalogRepository,
 ) : ViewModel() {
 
-    private val _effect = MutableSharedFlow<CatalogEffect>()
+    private val _effect = MutableSharedFlow<CatalogEffect>(extraBufferCapacity = 1)
     val effect = _effect.asSharedFlow()
 
     private val _uiState = MutableStateFlow(CatalogState())

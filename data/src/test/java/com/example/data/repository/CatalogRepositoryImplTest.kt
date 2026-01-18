@@ -16,7 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import java.io.IOException
 import kotlin.time.Instant
@@ -24,13 +27,19 @@ import kotlin.time.Instant
 class CatalogRepositoryImplTest {
 
     private val testDispatcher = StandardTestDispatcher()
+    private lateinit var jsonDataSource: JsonDataSource
+    private lateinit var favoritesDao: FavoritesDao
+
+    @Before
+    fun setup() {
+        jsonDataSource = mockk(relaxed = true)
+        favoritesDao = mockk(relaxed = true)
+    }
 
     @Test
-    fun `GIVEN books WHEN getBooks filters items case insensitively THEN return filtered list`() =
+    fun `GIVEN datasource has 2 books  WHEN getBooks filters items case insensitively THEN return filtered list`() =
         runTest(testDispatcher) {
             // 1. Arrange
-            val jsonDataSource: JsonDataSource = mockk()
-            val favoritesDao: FavoritesDao = mockk()
             val catalog = CatalogResponseDto(
                 updatedAt = Instant.parse("2025-01-17T10:15:30Z"),
                 items = listOf(
@@ -61,16 +70,16 @@ class CatalogRepositoryImplTest {
             val result = repository.getBooks(BookQuery("KOTLIN"))
 
             // 3. Assert
-            Assert.assertTrue(result is DataResult.Success)
+            assertTrue(result is DataResult.Success)
             val flow = (result as DataResult.Success).data
 
             flow.test {
                 val emittedList = awaitItem()
 
                 // Verify only 1 item is returned
-                Assert.assertEquals(1, emittedList.size)
-                Assert.assertEquals(catalog.items[0].id, emittedList[0].id)
-                Assert.assertEquals(catalog.items[0].title, emittedList[0].title)
+                assertEquals(1, emittedList.size)
+                assertEquals(catalog.items[0].id, emittedList[0].id)
+                assertEquals(catalog.items[0].title, emittedList[0].title)
 
                 awaitComplete()
             }
@@ -80,8 +89,6 @@ class CatalogRepositoryImplTest {
     fun `GIVEN non-existing id WHEN getBookById THEN return Success with null`() = runTest(testDispatcher) {
         // 1. Arrange
         val nonExistingId = "999"
-        val jsonDataSource: JsonDataSource = mockk()
-        val favoritesDao: FavoritesDao = mockk()
         val catalog = CatalogResponseDto(
             updatedAt = Instant.parse("2025-01-17T10:15:30Z"),
             items = listOf(
@@ -97,7 +104,6 @@ class CatalogRepositoryImplTest {
 
         // Mock sources for the repository
         coEvery { jsonDataSource.getCatalog() } returns catalog
-        coEvery { favoritesDao.selectById(nonExistingId) } returns null
 
         val repository = CatalogRepositoryImpl(jsonDataSource, favoritesDao, testDispatcher)
 
@@ -105,18 +111,16 @@ class CatalogRepositoryImplTest {
         val result = repository.getBookById(nonExistingId)
 
         // 3. Assert
-        Assert.assertTrue(result is DataResult.Success)
+        assertTrue(result is DataResult.Success)
 
         val successResult = result as DataResult.Success
-        Assert.assertNull("Expected null book for non-existing ID", successResult.data)
+        assertNull("Expected null book for non-existing ID", successResult.data)
     }
 
     @Test
-    fun `GIVEN books WHEN favorites updates THEN getBooks reflects favorite status reactively`() =
+    fun `GIVEN datasource has 2 books WHEN favorites updates THEN getBooks reflects favorite status reactively`() =
         runTest(testDispatcher) {
             // 1. Arrange
-            val jsonDataSource: JsonDataSource = mockk()
-            val favoritesDao: FavoritesDao = mockk()
             val catalog = CatalogResponseDto(
                 updatedAt = Instant.parse("2025-01-17T10:15:30Z"),
                 items = listOf(
@@ -150,30 +154,30 @@ class CatalogRepositoryImplTest {
             val result = repository.getBooks(BookQuery(""))
 
             // 3. Assert
-            Assert.assertTrue(result is DataResult.Success)
+            assertTrue(result is DataResult.Success)
 
             val flow = (result as DataResult.Success).data
 
             flow.test {
                 // Initial state: No favorites
                 val firstEmission = awaitItem()
-                Assert.assertEquals(false, firstEmission.find { it.id == "1" }?.isFavorite)
-                Assert.assertEquals(false, firstEmission.find { it.id == "2" }?.isFavorite)
+                assertEquals(false, firstEmission.find { it.id == "1" }?.isFavorite)
+                assertEquals(false, firstEmission.find { it.id == "2" }?.isFavorite)
 
                 // Simulate database update: Add book "1" to favorites
                 favoritesFlow.value = listOf(FavoritesEntity("1"))
 
                 // Verify the flow re-emits with the updated favorite status
                 val secondEmission = awaitItem()
-                Assert.assertEquals(true, secondEmission.find { it.id == "1" }?.isFavorite)
-                Assert.assertEquals(false, secondEmission.find { it.id == "2" }?.isFavorite)
+                assertEquals(true, secondEmission.find { it.id == "1" }?.isFavorite)
+                assertEquals(false, secondEmission.find { it.id == "2" }?.isFavorite)
 
                 // Simulate database update: Add book "2" as well
                 favoritesFlow.value = listOf(FavoritesEntity("1"), FavoritesEntity("2"))
 
                 val thirdEmission = awaitItem()
-                Assert.assertEquals(true, thirdEmission.find { it.id == "1" }?.isFavorite)
-                Assert.assertEquals(true, thirdEmission.find { it.id == "2" }?.isFavorite)
+                assertEquals(true, thirdEmission.find { it.id == "1" }?.isFavorite)
+                assertEquals(true, thirdEmission.find { it.id == "2" }?.isFavorite)
 
                 cancelAndIgnoreRemainingEvents()
             }
@@ -183,8 +187,6 @@ class CatalogRepositoryImplTest {
     @Test
     fun `GIVEN data source failure WHEN getBooks THEN return DataResult Error`() = runTest(testDispatcher) {
         // 1. Arrange
-        val jsonDataSource: JsonDataSource = mockk()
-        val favoritesDao: FavoritesDao = mockk()
         val exception = IOException("")
 
         // Mock the data source to throw an exception
@@ -196,11 +198,11 @@ class CatalogRepositoryImplTest {
         val result = repository.getBooks(BookQuery(""))
 
         // 3. Assert
-        Assert.assertTrue("Expected DataResult.Error but was $result", result is DataResult.Error)
+        assertTrue("Expected DataResult.Error but was $result", result is DataResult.Error)
 
         val errorResult = result as DataResult.Error
         // Depending on your error mapping logic, verify the message or exception type
-        Assert.assertEquals(CommonError.FileNotFoundError, errorResult.error)
+        assertEquals(CommonError.FileNotFoundError, errorResult.error)
     }
 
 
@@ -209,8 +211,6 @@ class CatalogRepositoryImplTest {
         // 1. Arrange
         val bookId = "1"
         val exception = RuntimeException("Failed to load catalog")
-        val jsonDataSource: JsonDataSource = mockk()
-        val favoritesDao: FavoritesDao = mockk()
 
         // Mock the data source to throw an exception
         coEvery { jsonDataSource.getCatalog() } throws exception
@@ -221,11 +221,11 @@ class CatalogRepositoryImplTest {
         val result = repository.getBookById(bookId)
 
         // 3. Assert
-        Assert.assertTrue("Expected DataResult.Error but was $result", result is DataResult.Error)
+        assertTrue("Expected DataResult.Error but was $result", result is DataResult.Error)
 
         val errorResult = result as DataResult.Error
         // Verify that the error contains the expected exception
-        Assert.assertEquals(CommonError.UnknownError(exception), errorResult.error)
+        assertEquals(CommonError.UnknownError(exception), errorResult.error)
     }
 
 
@@ -234,8 +234,6 @@ class CatalogRepositoryImplTest {
         // 1. Arrange
         val bookId = "1"
         val exception = RuntimeException("Database error")
-        val jsonDataSource: JsonDataSource = mockk()
-        val favoritesDao: FavoritesDao = mockk()
 
         // Mock the DAO to throw an exception when called
         coEvery { favoritesDao.toggleFavorite(bookId) } throws exception
@@ -246,9 +244,9 @@ class CatalogRepositoryImplTest {
         val result = repository.toggleFavoriteBook(bookId)
 
         // 3. Assert
-        Assert.assertTrue("Expected DataResult.Error but was $result", result is DataResult.Error)
+        assertTrue("Expected DataResult.Error but was $result", result is DataResult.Error)
 
         val errorResult = result as DataResult.Error
-        Assert.assertEquals(CommonError.UnknownError(exception), errorResult.error)
+        assertEquals(CommonError.UnknownError(exception), errorResult.error)
     }
 }

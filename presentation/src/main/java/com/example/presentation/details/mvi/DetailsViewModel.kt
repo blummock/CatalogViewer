@@ -23,7 +23,7 @@ internal class DetailsViewModel @Inject constructor(
 
     private val bookId: String = checkNotNull(savedStateHandle[AppRoute.Details.BOOK_ID])
 
-    private val _effect = MutableSharedFlow<DetailsEffect>()
+    private val _effect = MutableSharedFlow<DetailsEffect>(extraBufferCapacity = 1)
     val effect = _effect.asSharedFlow()
 
     private val _uiState = MutableStateFlow<DetailsState>(DetailsState.Loading)

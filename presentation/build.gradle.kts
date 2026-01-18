@@ -35,7 +35,12 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.navigation.runtime.ktx)
+
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.kotlinx.coroutines.test)
+
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.kotlinx.collections.immutable)
 
