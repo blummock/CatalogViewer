@@ -4,11 +4,11 @@ sealed interface DomainError {
 
     val message: String
 
-    data class FileNotFoundError(
-        override val message: String
-    ) : DomainError
+    data object FileNotFoundError : DomainError {
+        override val message: String = "File not found"
+    }
 
-    data class UnknownError(
-        override val message: String
-    ) : DomainError
+    data object UnknownError : DomainError {
+        override val message: String = "Unknown error"
+    }
 }

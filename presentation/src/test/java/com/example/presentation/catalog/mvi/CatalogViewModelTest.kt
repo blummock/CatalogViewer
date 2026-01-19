@@ -82,11 +82,8 @@ class CatalogViewModelTest {
 
     @Test
     fun `GIVEN viewModel with initial uiState WHEN getBooks fails THEN the booksState is Empty`() = runTest {
-        // 1. Arrange
-        val error = DomainError.FileNotFoundError("message")
-
         // Mock repository to return an Error result
-        coEvery { repository.getBooks(any()) } returns DataResult.Error(error)
+        coEvery { repository.getBooks(any()) } returns DataResult.Error(DomainError.FileNotFoundError)
 
         // 2. Act
         val viewModel = CatalogViewModel(repository)
@@ -130,7 +127,7 @@ class CatalogViewModelTest {
     fun `GIVEN viewModel WHEN OnFavorite fails THEN effect is OnShowError`() = runTest {
         // 1. Arrange
         val bookId = "book_1"
-        val error = DomainError.UnknownError("message")
+        val error = DomainError.UnknownError
 
         // Mock toggleFavoriteBook to return our specific error
         coEvery { repository.toggleFavoriteBook(bookId) } returns DataResult.Error(error)
