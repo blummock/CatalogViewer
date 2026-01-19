@@ -88,6 +88,6 @@ Choosing a new screen (navigation destination) over a bottom sheet provides seve
 * Full screens align better with Material navigation patterns for primary user flows like `Detail View`, while bottom sheets are more suitable for transient or contextual actions.
 
 A dedicated screen was chosen because it integrates naturally with Navigation and system back behavior,
-has simple state and avoids overloading the Catalog with additional UI and logic.
+has simple state and avoids overloading the `CatalogScreen` with additional UI and logic.
 
 ---
