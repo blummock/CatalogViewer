@@ -1,9 +1,9 @@
 package com.example.data.mapper
 
-import com.example.domain.error.CommonError
+import com.example.domain.error.DomainError
 import java.io.IOException
 
-internal fun Throwable.toDomainException(): CommonError = when (this) {
-    is IOException -> CommonError.FileNotFoundError
-    else -> CommonError.UnknownError(this)
+internal fun Throwable.toDomainException(): DomainError = when (this) {
+    is IOException -> DomainError.FileNotFoundError(this.message ?: "File not found")
+    else -> DomainError.UnknownError(this.message ?: "Unknown error")
 }

@@ -1,6 +1,6 @@
 package com.example.domain.entity
 
-import com.example.domain.error.CommonError
+import com.example.domain.error.DomainError
 
 sealed interface DataResult<out T> {
     data class Success<T>(
@@ -8,6 +8,6 @@ sealed interface DataResult<out T> {
     ) : DataResult<T>
 
     data class Error<T>(
-        val error: CommonError,
+        val error: DomainError,
     ) : DataResult<T>
 }

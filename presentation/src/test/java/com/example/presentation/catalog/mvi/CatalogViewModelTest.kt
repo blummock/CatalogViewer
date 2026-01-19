@@ -5,7 +5,7 @@ import com.example.domain.entity.Book
 import com.example.domain.entity.BookQuery
 import com.example.domain.entity.Category
 import com.example.domain.entity.DataResult
-import com.example.domain.error.CommonError
+import com.example.domain.error.DomainError
 import com.example.domain.repository.CatalogRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -83,7 +83,7 @@ class CatalogViewModelTest {
     @Test
     fun `GIVEN viewModel with initial uiState WHEN getBooks fails THEN the booksState is Empty`() = runTest {
         // 1. Arrange
-        val error = CommonError.FileNotFoundError
+        val error = DomainError.FileNotFoundError("message")
 
         // Mock repository to return an Error result
         coEvery { repository.getBooks(any()) } returns DataResult.Error(error)
@@ -130,7 +130,7 @@ class CatalogViewModelTest {
     fun `GIVEN viewModel WHEN OnFavorite fails THEN effect is OnShowError`() = runTest {
         // 1. Arrange
         val bookId = "book_1"
-        val error = CommonError.UnknownError(RuntimeException(""))
+        val error = DomainError.UnknownError("message")
 
         // Mock toggleFavoriteBook to return our specific error
         coEvery { repository.toggleFavoriteBook(bookId) } returns DataResult.Error(error)

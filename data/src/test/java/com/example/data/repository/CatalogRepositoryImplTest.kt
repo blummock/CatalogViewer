@@ -8,7 +8,7 @@ import com.example.data.local.dao.FavoritesDao
 import com.example.data.local.entity.FavoritesEntity
 import com.example.domain.entity.BookQuery
 import com.example.domain.entity.DataResult
-import com.example.domain.error.CommonError
+import com.example.domain.error.DomainError
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -187,7 +187,8 @@ class CatalogRepositoryImplTest {
     @Test
     fun `GIVEN data source failure WHEN getBooks THEN return DataResult Error`() = runTest(testDispatcher) {
         // 1. Arrange
-        val exception = IOException("")
+        val message = "error message"
+        val exception = IOException(message)
 
         // Mock the data source to throw an exception
         coEvery { jsonDataSource.getCatalog() } throws exception
@@ -202,7 +203,7 @@ class CatalogRepositoryImplTest {
 
         val errorResult = result as DataResult.Error
         // Depending on your error mapping logic, verify the message or exception type
-        assertEquals(CommonError.FileNotFoundError, errorResult.error)
+        assertEquals(DomainError.FileNotFoundError(message), errorResult.error)
     }
 
 
@@ -210,7 +211,8 @@ class CatalogRepositoryImplTest {
     fun `GIVEN data source failure WHEN getBookById THEN return DataResult Error`() = runTest(testDispatcher) {
         // 1. Arrange
         val bookId = "1"
-        val exception = RuntimeException("Failed to load catalog")
+        val message = "Failed to load catalog"
+        val exception = RuntimeException(message)
 
         // Mock the data source to throw an exception
         coEvery { jsonDataSource.getCatalog() } throws exception
@@ -225,7 +227,7 @@ class CatalogRepositoryImplTest {
 
         val errorResult = result as DataResult.Error
         // Verify that the error contains the expected exception
-        assertEquals(CommonError.UnknownError(exception), errorResult.error)
+        assertEquals(DomainError.UnknownError(message), errorResult.error)
     }
 
 
@@ -233,7 +235,8 @@ class CatalogRepositoryImplTest {
     fun `GIVEN dao failure WHEN toggleFavoriteBook THEN return DataResult Error`() = runTest(testDispatcher) {
         // 1. Arrange
         val bookId = "1"
-        val exception = RuntimeException("Database error")
+        val message = "Database error"
+        val exception = RuntimeException(message)
 
         // Mock the DAO to throw an exception when called
         coEvery { favoritesDao.toggleFavorite(bookId) } throws exception
@@ -247,6 +250,6 @@ class CatalogRepositoryImplTest {
         assertTrue("Expected DataResult.Error but was $result", result is DataResult.Error)
 
         val errorResult = result as DataResult.Error
-        assertEquals(CommonError.UnknownError(exception), errorResult.error)
+        assertEquals(DomainError.UnknownError(message), errorResult.error)
     }
 }
